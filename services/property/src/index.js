@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-const PORT = process.env.PORT || 3003;
+const PORT = process.env.PORT || 3203;
 const JWT_SECRET = process.env.JWT_SECRET || 'wuye-mgmt-secret-key-2024';
 const path = require('path');
 

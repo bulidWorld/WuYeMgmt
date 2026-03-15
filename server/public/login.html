@@ -158,16 +158,16 @@
       
       <div class="service-links">
         <h3>其他服务入口</h3>
-        <a href="http://localhost:3002/" target="_blank">🏪 商家服务 (端口 3002)</a>
-        <a href="http://localhost:3003/" target="_blank">🏠 物业服务 (端口 3003)</a>
-        <a href="http://localhost:3004/" target="_blank">⚙️ 管理服务 (端口 3004)</a>
+        <a href="http://localhost:3202/" target="_blank">🏪 商家服务 (端口 3002)</a>
+        <a href="http://localhost:3203/" target="_blank">🏠 物业服务 (端口 3003)</a>
+        <a href="http://localhost:3204/" target="_blank">⚙️ 管理服务 (端口 3004)</a>
       </div>
     </div>
   </div>
 
   <script>
     // 自动使用当前主机地址，支持局域网访问
-    const currentHost = window.location.host || 'localhost:3001';
+    const currentHost = window.location.host || 'localhost:3201';
     const API_BASE = window.location.protocol + '//' + currentHost + '/api';
     const submitBtn = document.getElementById('submitBtn');
     const message = document.getElementById('message');
@@ -197,7 +197,7 @@
           localStorage.setItem('userToken', result.token);
           localStorage.setItem('userInfo', JSON.stringify(result.user));
           setTimeout(() => {
-            window.location.href = 'http://localhost:3001/';
+            window.location.href = 'http://localhost:3201/';
           }, 1000);
         } else {
           showMessage(result.error, 'error');
@@ -224,7 +224,7 @@
     // 加载小区列表
     async function loadCommunities() {
       try {
-        const res = await fetch('http://localhost:3001/api/communities');
+        const res = await fetch('http://localhost:3201/api/communities');
         const result = await res.json();
         return result.list || [];
       } catch (err) {
@@ -312,7 +312,7 @@
             showMessage(result.message, 'success');
             form.reset();
             setTimeout(() => {
-              window.location.href = 'http://localhost:3001/';
+              window.location.href = 'http://localhost:3201/';
             }, 1500);
           } else {
             showMessage(result.error, 'error');

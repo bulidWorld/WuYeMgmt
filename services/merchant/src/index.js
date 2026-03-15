@@ -10,7 +10,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 const app = express();
-const PORT = process.env.PORT || 3002;
+const PORT = process.env.PORT || 3202;
 const JWT_SECRET = process.env.JWT_SECRET || 'wuye-mgmt-secret-key-2024';
 
 app.use(cors());
