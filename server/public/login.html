@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社区便民低碳超市 - 登录</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (min-width: 768px) {
+      .container { flex-direction: row; }
+    }
+    .left {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      padding: 40px;
+      color: white;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .left h1 { font-size: 24px; margin-bottom: 16px; }
+    .left p { opacity: 0.9; line-height: 1.6; font-size: 14px; }
+    .right {
+      padding: 40px;
+      flex: 1;
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: #333;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: #11998e;
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(17, 153, 142, 0.4);
+    }
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .message.error { background: #fee; color: #c00; display: block; }
+    .message.success { background: #efe; color: #060; display: block; }
+    .hint {
+      font-size: 12px;
+      color: #888;
+      margin-top: 8px;
+    }
+    .service-links {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #eee;
+    }
+    .service-links h3 {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 12px;
+    }
+    .service-links a {
+      display: block;
+      padding: 8px 12px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      color: #333;
+      text-decoration: none;
+      font-size: 13px;
+      margin-bottom: 8px;
+      transition: background 0.2s;
+    }
+    .service-links a:hover {
+      background: #e8f5e9;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <h1>🌿 用户登录</h1>
+      <p>社区便民低碳超市 - 移动端</p>
+      <p style="margin-top: 16px; font-size: 13px; opacity: 0.8;">
+        登录后进入移动端界面，可购买商品、查看积分、抵扣物业费
+      </p>
+    </div>
+    
+    <div class="right">
+      <div id="message" class="message"></div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label>手机号</label>
+          <input type="tel" id="phone" placeholder="请输入手机号" required pattern="1[3-9]\d{9}">
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <input type="password" id="password" placeholder="请输入密码" required minlength="6">
+          <p class="hint">初始密码为手机号后 6 位</p>
+        </div>
+        <button type="submit" class="btn btn-primary" id="submitBtn">登录</button>
+      </form>
+      
+      <div style="margin-top: 20px; text-align: center;">
+        <p style="font-size: 14px; color: #666;">
+          还没有账号？<a href="#" id="registerLink" style="color: #11998e;">立即注册</a>
+        </p>
+      </div>
+      
+      <div class="service-links">
+        <h3>其他服务入口</h3>
+        <a href="http://localhost:3002/" target="_blank">🏪 商家服务 (端口 3002)</a>
+        <a href="http://localhost:3003/" target="_blank">🏠 物业服务 (端口 3003)</a>
+        <a href="http://localhost:3004/" target="_blank">⚙️ 管理服务 (端口 3004)</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 自动使用当前主机地址，支持局域网访问
+    const currentHost = window.location.host || 'localhost:3001';
+    const API_BASE = window.location.protocol + '//' + currentHost + '/api';
+    const submitBtn = document.getElementById('submitBtn');
+    const message = document.getElementById('message');
+    const registerLink = document.getElementById('registerLink');
+    
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const phone = document.getElementById('phone').value;
+      const password = document.getElementById('password').value;
+      
+      submitBtn.disabled = true;
+      submitBtn.textContent = '登录中...';
+      showMessage('', '');
+      
+      try {
+        const res = await fetch(`${API_BASE}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ phone, password })
+        });
+        
+        const result = await res.json();
+        
+        if (res.ok) {
+          showMessage('登录成功！正在跳转...', 'success');
+          localStorage.setItem('userToken', result.token);
+          localStorage.setItem('userInfo', JSON.stringify(result.user));
+          setTimeout(() => {
+            window.location.href = 'http://localhost:3001/';
+          }, 1000);
+        } else {
+          showMessage(result.error, 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = '登录';
+        }
+      } catch (err) {
+        showMessage('网络错误，请稍后重试', 'error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = '登录';
+      }
+    });
+    
+    registerLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showRegister();
+    });
+    
+    function showMessage(text, type) {
+      message.textContent = text;
+      message.className = 'message ' + type;
+    }
+    
+    // 加载小区列表
+    async function loadCommunities() {
+      try {
+        const res = await fetch('http://localhost:3001/api/communities');
+        const result = await res.json();
+        return result.list || [];
+      } catch (err) {
+        console.error('Load communities error:', err);
+        return [];
+      }
+    }
+    
+    async function showRegister() {
+      const communities = await loadCommunities();
+      const communityOptions = communities.map(c => 
+        `<option value="${c.id}">${c.name} - ${c.address}</option>`
+      ).join('');
+      
+      const html = `
+        <div style="margin-top: 20px;">
+          <h3 style="margin-bottom: 16px; font-size: 16px;">用户注册</h3>
+          <form id="registerForm">
+            <div class="form-group">
+              <label>手机号 *</label>
+              <input type="tel" name="phone" required pattern="1[3-9]\\d{9}" placeholder="请输入 11 位手机号">
+            </div>
+            <div class="form-group">
+              <label>密码 *</label>
+              <input type="password" name="password" required minlength="6" placeholder="至少 6 位密码">
+            </div>
+            <div class="form-group">
+              <label>昵称</label>
+              <input type="text" name="nickname" placeholder="请输入昵称（可选）">
+            </div>
+            <div class="form-group">
+              <label>所在小区 *</label>
+              <select name="community_id" required style="width:100%;padding:12px 16px;border:2px solid #e0e0e0;border-radius:8px;font-size:16px;">
+                <option value="">请选择小区</option>
+                ${communityOptions}
+              </select>
+            </div>
+            <div class="form-group">
+              <label>楼栋号</label>
+              <input type="text" name="building_no" placeholder="如：1 栋">
+            </div>
+            <div class="form-group">
+              <label>单元号</label>
+              <input type="text" name="unit_no" placeholder="如：1 单元">
+            </div>
+            <div class="form-group">
+              <label>房间号</label>
+              <input type="text" name="room_no" placeholder="如：101">
+            </div>
+            <button type="submit" class="btn btn-primary">注册</button>
+            <button type="button" class="btn" onclick="location.reload()" style="margin-top: 8px; background: #f0f0f0;">返回登录</button>
+          </form>
+        </div>
+      `;
+      document.querySelector('.right').innerHTML = html;
+      
+      document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const form = e.target;
+        const formData = new FormData(form);
+        const data = {
+          phone: formData.get('phone'),
+          password: formData.get('password'),
+          nickname: formData.get('nickname') || null,
+          community_id: formData.get('community_id') ? parseInt(formData.get('community_id')) : null,
+          building_no: formData.get('building_no') || null,
+          unit_no: formData.get('unit_no') || null,
+          room_no: formData.get('room_no') || null
+        };
+        
+        if (!data.community_id) {
+          showMessage('请选择所在小区', 'error');
+          return;
+        }
+        
+        try {
+          const res = await fetch(`${API_BASE}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          const result = await res.json();
+          
+          if (res.ok) {
+            showMessage(result.message, 'success');
+            form.reset();
+            setTimeout(() => {
+              window.location.href = 'http://localhost:3001/';
+            }, 1500);
+          } else {
+            showMessage(result.error, 'error');
+          }
+        } catch (err) {
+          showMessage('网络错误，请稍后重试', 'error');
+        }
+      });
+    }
+  </script>
+</body>
+</html>

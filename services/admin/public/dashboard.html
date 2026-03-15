@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>平台管理后台</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #1a1a1a; color: #f5f5f5; }
+    .header {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      border-bottom: 2px solid #d4af37;
+      color: #d4af37; padding: 16px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .header h1 { font-size: 20px; font-weight: 600; }
+    .logout-btn {
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); border: none; color: #1a1a1a;
+      padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;
+    }
+    .main { display: flex; min-height: calc(100vh - 60px); }
+    .sidebar {
+      width: 200px; background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+      border-right: 1px solid #d4af37; padding: 20px 0;
+    }
+    .menu-item {
+      padding: 14px 24px; cursor: pointer; color: #aaa;
+      border-left: 3px solid transparent; transition: all 0.3s;
+    }
+    .menu-item:hover { background: #2d2d2d; color: #d4af37; }
+    .menu-item.active {
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+      color: #1a1a1a; border-left-color: #d4af37; font-weight: 600;
+    }
+    .content { flex: 1; padding: 24px; background: #1a1a1a; }
+    .card {
+      background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+      border: 1px solid #d4af37; border-radius: 12px; padding: 24px;
+      margin-bottom: 20px; box-shadow: 0 4px 16px rgba(212, 175, 55, 0.1);
+    }
+    .card-title { 
+      font-size: 18px; font-weight: 600; margin-bottom: 20px; 
+      color: #d4af37; padding-bottom: 12px;
+      border-bottom: 1px solid #d4af37;
+    }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 20px; }
+    .stat-card {
+      background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+      border: 1px solid #d4af37; border-radius: 12px; padding: 24px;
+      text-align: center;
+    }
+    .stat-value { 
+      font-size: 32px; font-weight: 700; 
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .stat-label { font-size: 14px; color: #aaa; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
+    th { 
+      font-weight: 600; color: #d4af37; font-size: 14px; 
+      background: #2d2d2d;
+    }
+    td { font-size: 14px; color: #f5f5f5; }
+    tr:hover { background: #2d2d2d; }
+    .btn {
+      padding: 8px 16px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 14px; font-weight: 500;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%);
+      color: #1a1a1a;
+    }
+    .btn-primary:hover { 
+      transform: translateY(-1px); 
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4); 
+    }
+    .btn-sm { padding: 6px 12px; font-size: 13px; }
+    .page { display: none; }
+    .page.active { display: block; }
+    
+    /* 表单样式 */
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #d4af37; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 10px 14px;
+      background: #2d2d2d; border: 1px solid #444;
+      color: #f5f5f5; border-radius: 6px; font-size: 14px;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none; border-color: #d4af37;
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>⚙️ 平台管理后台</h1>
+    <button class="logout-btn" onclick="logout()">退出登录</button>
+  </div>
+  <div class="main">
+    <div class="sidebar">
+      <div class="menu-item active" onclick="showPage('dashboard')">📊 概览</div>
+      <div class="menu-item" onclick="showPage('users')">👥 用户管理</div>
+      <div class="menu-item" onclick="showPage('merchants')">🏪 商家管理</div>
+      <div class="menu-item" onclick="showPage('properties')">🏠 物业管理</div>
+      <div class="menu-item" onclick="showPage('communities')">🏘️ 小区管理</div>
+      <div class="menu-item" onclick="window.location.href='/categories.html'">🏷️ 分类管理</div>
+      <div class="menu-item" onclick="showPage('orders')">📝 订单管理</div>
+    </div>
+    <div class="content">
+      <!-- 概览页 -->
+      <div class="page active" id="dashboard">
+        <div class="stats">
+          <div class="stat-card"><div class="stat-value" id="statUsers">0</div><div class="stat-label">用户总数</div></div>
+          <div class="stat-card"><div class="stat-value" id="statMerchants">0</div><div class="stat-label">商家总数</div></div>
+          <div class="stat-card"><div class="stat-value" id="statOrders">0</div><div class="stat-label">订单总数</div></div>
+          <div class="stat-card"><div class="stat-value" id="statRevenue">0</div><div class="stat-label">销售总额</div></div>
+        </div>
+        <div class="card"><div class="card-title">📋 系统信息</div><div id="systemInfo">加载中...</div></div>
+      </div>
+      <!-- 用户管理页 -->
+      <div class="page" id="users">
+        <div class="card"><div class="card-title">👥 用户列表</div><table id="usersTable"><thead><tr><th>ID</th><th>手机号</th><th>昵称</th><th>积分</th><th>会员</th><th>注册时间</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <!-- 商家管理页 -->
+      <div class="page" id="merchants">
+        <div class="card"><div class="card-title">🏪 商家列表</div><table id="merchantsTable"><thead><tr><th>ID</th><th>名称</th><th>联系人</th><th>电话</th><th>状态</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <!-- 物业管理页 -->
+      <div class="page" id="properties">
+        <div class="card"><div class="card-title">🏠 物业列表</div><table id="propertiesTable"><thead><tr><th>ID</th><th>名称</th><th>小区</th><th>电话</th><th>状态</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <!-- 小区管理页 -->
+      <div class="page" id="communities">
+        <div class="card"><div class="card-title">🏘️ 小区列表</div><table id="communitiesTable"><thead><tr><th>ID</th><th>名称</th><th>地址</th><th>物业</th><th>楼栋数</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <!-- 订单管理页 -->
+      <div class="page" id="orders">
+        <div class="card"><div class="card-title">📝 订单列表</div><table id="ordersTable"><thead><tr><th>订单号</th><th>用户</th><th>商家</th><th>金额</th><th>状态</th><th>时间</th></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const API_BASE = window.location.protocol + '//' + window.location.host + '/api';
+    let token = localStorage.getItem('adminToken');
+    if (!token) window.location.href = '/';
+    
+    document.addEventListener('DOMContentLoaded', loadData);
+    
+    async function loadData() {
+      await loadStats();
+      await loadUsers();
+      await loadMerchants();
+      await loadProperties();
+      await loadCommunities();
+      await loadOrders();
+    }
+    
+    async function loadStats() {
+      try {
+        const [usersRes, merchantsRes, ordersRes] = await Promise.all([
+          fetch(API_BASE + '/users', { headers: { 'Authorization': 'Bearer ' + token } }),
+          fetch(API_BASE + '/merchants', { headers: { 'Authorization': 'Bearer ' + token } }),
+          fetch(API_BASE + '/orders', { headers: { 'Authorization': 'Bearer ' + token } })
+        ]);
+        const users = await usersRes.json();
+        const merchants = await merchantsRes.json();
+        const orders = await ordersRes.json();
+        
+        document.getElementById('statUsers').textContent = (users.list || []).length;
+        document.getElementById('statMerchants').textContent = (merchants.list || []).length;
+        document.getElementById('statOrders').textContent = (orders.list || []).length;
+        document.getElementById('statRevenue').textContent = '¥' + (orders.list || []).reduce((sum, o) => sum + (parseFloat(o.actual_amount) || 0), 0).toFixed(2);
+        
+        document.getElementById('systemInfo').innerHTML = 
+          '<p>服务运行正常</p>' +
+          '<p>用户数：' + (users.list || []).length + '</p>' +
+          '<p>商家数：' + (merchants.list || []).length + '</p>' +
+          '<p>订单数：' + (orders.list || []).length + '</p>';
+      } catch (err) { console.error(err); }
+    }
+    
+    async function loadUsers() {
+      const res = await fetch(API_BASE + '/users', { headers: { 'Authorization': 'Bearer ' + token } });
+      const data = await res.json();
+      const tbody = document.querySelector('#usersTable tbody');
+      tbody.innerHTML = (data.list || []).map(u => 
+        '<tr><td>' + u.id + '</td><td>' + u.phone + '</td><td>' + (u.nickname || '-') + '</td><td>' + u.available_points + '</td><td>' + (u.is_member ? '✓' : '-') + '</td><td>' + new Date(u.created_at).toLocaleDateString() + '</td></tr>'
+      ).join('');
+    }
+    
+    async function loadMerchants() {
+      const res = await fetch(API_BASE + '/merchants', { headers: { 'Authorization': 'Bearer ' + token } });
+      const data = await res.json();
+      const tbody = document.querySelector('#merchantsTable tbody');
+      tbody.innerHTML = (data.list || []).map(m => 
+        '<tr><td>' + m.id + '</td><td>' + m.name + '</td><td>' + (m.contact_name || '-') + '</td><td>' + (m.contact_phone || '-') + '</td><td>' + (m.status == 1 ? '正常' : '禁用') + '</td></tr>'
+      ).join('');
+    }
+    
+    async function loadProperties() {
+      const res = await fetch(API_BASE + '/properties', { headers: { 'Authorization': 'Bearer ' + token } });
+      const data = await res.json();
+      const tbody = document.querySelector('#propertiesTable tbody');
+      tbody.innerHTML = (data.list || []).map(p => 
+        '<tr><td>' + p.id + '</td><td>' + p.name + '</td><td>' + (p.community_name || '-') + '</td><td>' + (p.contact_phone || '-') + '</td><td>' + (p.status == 1 ? '正常' : '禁用') + '</td></tr>'
+      ).join('');
+    }
+    
+    async function loadCommunities() {
+      const res = await fetch(API_BASE + '/communities', { headers: { 'Authorization': 'Bearer ' + token } });
+      const data = await res.json();
+      const tbody = document.querySelector('#communitiesTable tbody');
+      tbody.innerHTML = (data.list || []).map(c => 
+        '<tr><td>' + c.id + '</td><td>' + c.name + '</td><td>' + (c.address || '-') + '</td><td>' + (c.property_name || '-') + '</td><td>' + (c.building_count || 0) + '</td></tr>'
+      ).join('');
+    }
+    
+    async function loadOrders() {
+      const res = await fetch(API_BASE + '/orders', { headers: { 'Authorization': 'Bearer ' + token } });
+      const data = await res.json();
+      const tbody = document.querySelector('#ordersTable tbody');
+      const statusMap = {0:'待付款',1:'已付款',2:'已发货',3:'已核销',4:'已完成',5:'已取消'};
+      tbody.innerHTML = (data.list || []).map(o => 
+        '<tr><td>' + o.order_no + '</td><td>' + (o.user_name || '-') + '</td><td>' + (o.merchant_name || '-') + '</td><td>¥' + (o.actual_amount || 0).toFixed(2) + '</td><td>' + (statusMap[o.status] || '-') + '</td><td>' + new Date(o.created_at).toLocaleString() + '</td></tr>'
+      ).join('');
+    }
+    
+    function showPage(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      document.getElementById(page).classList.add('active');
+      event.target.classList.add('active');
+    }
+    
+    function logout() {
+      if (confirm('确定退出？')) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminInfo');
+        window.location.href = '/';
+      }
+    }
+  </script>
+</body>
+</html>

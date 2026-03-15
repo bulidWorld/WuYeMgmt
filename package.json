@@ -1,0 +1,25 @@
+{
+  "name": "wu-ye-mgmt",
+  "version": "1.0.0",
+  "description": "社区便民低碳生活超市管理平台",
+  "private": true,
+  "workspaces": [
+    "server",
+    "admin",
+    "merchant"
+  ],
+  "scripts": {
+    "dev:server": "cd server && npm run dev",
+    "dev:admin": "cd admin && npm run dev",
+    "dev:merchant": "cd merchant && npm run dev",
+    "install:all": "npm install && cd server && npm install && cd ../admin && npm install && cd ../merchant && npm install"
+  },
+  "keywords": [
+    "community",
+    "low-carbon",
+    "supermarket",
+    "property-management"
+  ],
+  "author": "",
+  "license": "MIT"
+}

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>物业服务 - 登录</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+      width: 100%;
+      max-width: 800px;
+      display: flex;
+      flex-direction: column;
+    }
+    @media (min-width: 768px) {
+      .container { flex-direction: row; }
+    }
+    .left {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      padding: 40px;
+      color: white;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .left h1 { font-size: 24px; margin-bottom: 16px; }
+    .left p { opacity: 0.9; line-height: 1.6; font-size: 14px; }
+    .right { padding: 40px; flex: 1; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #333; }
+    .form-group input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: border-color 0.3s;
+    }
+    .form-group input:focus { outline: none; border-color: #f5576c; }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(245, 87, 108, 0.4);
+    }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+    .message {
+      padding: 12px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+    }
+    .message.error { background: #fee; color: #c00; display: block; }
+    .message.success { background: #efe; color: #060; display: block; }
+    .hint { font-size: 12px; color: #888; margin-top: 8px; }
+    .service-links {
+      margin-top: 24px;
+      padding-top: 24px;
+      border-top: 1px solid #eee;
+    }
+    .service-links h3 { font-size: 13px; color: #666; margin-bottom: 12px; }
+    .service-links a {
+      display: block;
+      padding: 8px 12px;
+      background: #f5f5f5;
+      border-radius: 6px;
+      color: #333;
+      text-decoration: none;
+      font-size: 13px;
+      margin-bottom: 8px;
+      transition: background 0.2s;
+    }
+    .service-links a:hover { background: #e8f5e9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="left">
+      <h1>🏠 物业登录</h1>
+      <p>社区便民低碳超市 - 物业管理后台</p>
+      <p style="margin-top: 16px; font-size: 13px; opacity: 0.8;">
+        登录后可管理小区、楼栋、房间信息，审核物业费抵扣申请
+      </p>
+    </div>
+    
+    <div class="right">
+      <div id="message" class="message"></div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label>手机号</label>
+          <input type="tel" id="phone" placeholder="请输入手机号" required pattern="1[3-9]\d{9}">
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <input type="password" id="password" placeholder="请输入密码" required minlength="6">
+          <p class="hint">初始密码为 123456</p>
+        </div>
+        <button type="submit" class="btn btn-primary" id="submitBtn">登录</button>
+      </form>
+      
+      <div class="service-links">
+        <h3>其他服务入口：</h3>
+        <a href="http://localhost:3000/" target="_blank">🌿 用户登录 (端口 3000)</a>
+        <a href="http://localhost:3002/" target="_blank">🏪 商家服务 (端口 3002)</a>
+        <a href="http://localhost:3004/" target="_blank">⚙️ 管理服务 (端口 3004)</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // 自动使用当前主机地址，支持局域网访问
+      var currentHost = window.location.host || 'localhost:3003';
+      var API_BASE = window.location.protocol + '//' + currentHost + '/api';
+      
+      console.log('当前主机:', currentHost);
+      console.log('API 地址:', API_BASE);
+      
+      var loginForm = document.getElementById('loginForm');
+      var submitBtn = document.getElementById('submitBtn');
+      var message = document.getElementById('message');
+      var phoneInput = document.getElementById('phone');
+      var passwordInput = document.getElementById('password');
+      
+      console.log('物业登录页已加载');
+      console.log('API_BASE:', API_BASE);
+      
+      if (!loginForm) {
+        console.error('登录表单未找到');
+        return;
+      }
+      
+      loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        var phone = phoneInput.value.trim();
+        var password = passwordInput.value.trim();
+        
+        console.log('尝试登录，手机号:', phone);
+        
+        if (!phone || !password) {
+          showMessage('请输入手机号和密码', 'error');
+          return;
+        }
+        
+        submitBtn.disabled = true;
+        submitBtn.textContent = '登录中...';
+        showMessage('', 'success');
+        
+        // 测试 API 连接
+        fetch(API_BASE + '/login', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify({ phone: phone, password: password }),
+          credentials: 'omit'
+        })
+        .then(function(res) {
+          console.log('响应状态:', res.status);
+          if (!res.ok) {
+            throw new Error('HTTP ' + res.status);
+          }
+          return res.json();
+        })
+        .then(function(result) {
+          console.log('登录结果:', result);
+          if (result.token) {
+            showMessage('登录成功！正在跳转...', 'success');
+            localStorage.setItem('propertyToken', result.token);
+            localStorage.setItem('propertyInfo', JSON.stringify(result.property));
+            setTimeout(function() {
+              window.location.href = '/dashboard.html';
+            }, 1000);
+          } else {
+            showMessage(result.error || '登录失败', 'error');
+            submitBtn.disabled = false;
+            submitBtn.textContent = '登录';
+          }
+        })
+        .catch(function(err) {
+          console.error('登录错误:', err);
+          showMessage('网络错误：' + err.message + '，请稍后重试', 'error');
+          submitBtn.disabled = false;
+          submitBtn.textContent = '登录';
+        });
+      });
+      
+      function showMessage(text, type) {
+        if (!message) return;
+        message.textContent = text;
+        message.className = 'message ' + type;
+        message.style.display = text ? 'block' : 'none';
+      }
+    })();
+  </script>
+</body>
+</html>

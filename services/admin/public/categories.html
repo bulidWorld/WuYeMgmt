@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品分类管理 - 平台管理后台</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', sans-serif; background: #1a1a1a; color: #f5f5f5; }
+    .header {
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+      border-bottom: 2px solid #d4af37;
+      color: #d4af37; padding: 16px 24px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .header h1 { font-size: 20px; font-weight: 600; }
+    .logout-btn {
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); border: none; color: #1a1a1a;
+      padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600;
+    }
+    .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .card {
+      background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+      border: 1px solid #d4af37; border-radius: 12px; padding: 24px;
+      margin-bottom: 20px; box-shadow: 0 4px 16px rgba(212, 175, 55, 0.1);
+    }
+    .card-title { 
+      font-size: 18px; font-weight: 600; margin-bottom: 20px; 
+      color: #d4af37; padding-bottom: 12px;
+      border-bottom: 1px solid #d4af37;
+    }
+    .form-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: #d4af37; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 10px 14px;
+      background: #2d2d2d; border: 1px solid #444;
+      color: #f5f5f5; border-radius: 6px; font-size: 14px;
+    }
+    .form-group input:focus, .form-group select:focus {
+      outline: none; border-color: #d4af37;
+      box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+    }
+    .btn {
+      padding: 10px 20px; border: none; border-radius: 6px;
+      cursor: pointer; font-size: 14px; font-weight: 500;
+      transition: all 0.3s;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); color: #1a1a1a;
+    }
+    .btn-primary:hover { 
+      transform: translateY(-1px); 
+      box-shadow: 0 4px 12px rgba(212, 175, 55, 0.4); 
+    }
+    .btn-sm { padding: 6px 12px; font-size: 13px; }
+    .btn-success { background: #4caf50; color: white; }
+    .btn-danger { background: #f44336; color: white; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px; text-align: left; border-bottom: 1px solid #333; }
+    th { font-weight: 600; color: #d4af37; font-size: 14px; background: #2d2d2d; }
+    td { font-size: 14px; color: #f5f5f5; }
+    tr:hover { background: #2d2d2d; }
+    .tag {
+      display: inline-block; padding: 4px 10px; border-radius: 12px;
+      font-size: 12px; font-weight: 500;
+    }
+    .tag-rate { background: rgba(212, 175, 55, 0.2); color: #d4af37; border: 1px solid #d4af37; }
+    .modal {
+      display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8); z-index: 1000;
+    }
+    .modal-content {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+      border: 2px solid #d4af37; border-radius: 12px; padding: 24px;
+      width: 90%; max-width: 500px;
+    }
+    .modal-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px;
+    }
+    .modal-header h3 { color: #d4af37; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #999; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>⚙️ 平台管理后台 - 商品分类管理</h1>
+    <button class="logout-btn" onclick="logout()">退出登录</button>
+  </div>
+  
+  <div class="container">
+    <div class="card">
+      <div class="card-title">➕ 添加分类</div>
+      <form id="addCategoryForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label>分类名称 *</label>
+            <input type="text" name="name" required placeholder="如：粮油调味">
+          </div>
+          <div class="form-group">
+            <label>积分倍率 *</label>
+            <input type="number" name="points_rate" step="0.1" min="0.5" max="3.0" value="1.0" required placeholder="1.0">
+          </div>
+          <div class="form-group">
+            <label>低碳标签</label>
+            <input type="text" name="low_carbon_tag" placeholder="如：低碳环保">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>排序</label>
+            <input type="number" name="sort_order" value="0" placeholder="数字越小越靠前">
+          </div>
+          <div class="form-group">
+            <label>分类说明</label>
+            <input type="text" name="description" placeholder="分类描述">
+          </div>
+          <div class="form-group" style="display:flex;align-items:flex-end;">
+            <button type="submit" class="btn btn-primary" style="width:100%;">➕ 添加分类</button>
+          </div>
+        </div>
+      </form>
+    </div>
+    
+    <div class="card">
+      <div class="card-title">📋 分类列表</div>
+      <table id="categoriesTable">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>分类名称</th>
+            <th>积分倍率</th>
+            <th>低碳标签</th>
+            <th>排序</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+  
+  <!-- 编辑模态框 -->
+  <div id="editModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>✏️ 编辑分类</h3>
+        <button class="close-btn" onclick="closeEditModal()">&times;</button>
+      </div>
+      <form id="editCategoryForm">
+        <input type="hidden" id="editCategoryId">
+        <div class="form-group">
+          <label>分类名称 *</label>
+          <input type="text" id="editName" required>
+        </div>
+        <div class="form-group">
+          <label>积分倍率 *</label>
+          <input type="number" id="editPointsRate" step="0.1" min="0.5" max="3.0" required>
+        </div>
+        <div class="form-group">
+          <label>低碳标签</label>
+          <input type="text" id="editLowCarbonTag">
+        </div>
+        <div class="form-group">
+          <label>排序</label>
+          <input type="number" id="editSortOrder" value="0">
+        </div>
+        <div class="form-group">
+          <label>分类说明</label>
+          <input type="text" id="editDescription">
+        </div>
+        <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:24px;">
+          <button type="button" onclick="closeEditModal()" class="btn" style="background:#f5f5f5;">取消</button>
+          <button type="submit" class="btn btn-primary">💾 保存修改</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  
+  <script>
+    const API_BASE = window.location.protocol + '//' + window.location.host + '/api';
+    let token = localStorage.getItem('adminToken');
+    if (!token) window.location.href = '/';
+    
+    document.addEventListener('DOMContentLoaded', loadCategories);
+    
+    async function loadCategories() {
+      try {
+        const res = await fetch(API_BASE + '/categories', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        const tbody = document.querySelector('#categoriesTable tbody');
+        
+        if (!data.list || data.list.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999;padding:40px;">暂无分类</td></tr>';
+          return;
+        }
+        
+        tbody.innerHTML = data.list.map(c => 
+          '<tr>' +
+            '<td>' + c.id + '</td>' +
+            '<td>' + c.name + '</td>' +
+            '<td><span class="tag tag-rate">' + (c.points_rate || 1.0) + '倍</span></td>' +
+            '<td>' + (c.low_carbon_tag || '-') + '</td>' +
+            '<td>' + (c.sort_order || 0) + '</td>' +
+            '<td>' + (c.is_active == 1 ? '<span style="color:#4caf50;">✓ 启用</span>' : '<span style="color:#f44336;">✗ 停用</span>') + '</td>' +
+            '<td>' +
+              '<button class="btn btn-sm btn-primary" onclick="editCategory(' + c.id + ')" style="margin-right:6px;">编辑</button>' +
+              '<button class="btn btn-sm ' + (c.is_active == 1 ? 'btn-danger' : 'btn-success') + '" onclick="toggleCategory(' + c.id + ', ' + (c.is_active == 1 ? 0 : 1) + ')">' + (c.is_active == 1 ? '停用' : '启用') + '</button>' +
+            '</td>' +
+          '</tr>'
+        ).join('');
+      } catch (err) {
+        console.error('加载分类失败:', err);
+        alert('加载分类失败');
+      }
+    }
+    
+    // 添加分类
+    document.getElementById('addCategoryForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const data = {
+        name: this.name.value,
+        points_rate: parseFloat(this.points_rate.value),
+        low_carbon_tag: this.low_carbon_tag.value || null,
+        sort_order: parseInt(this.sort_order.value) || 0,
+        description: this.description.value || null
+      };
+      
+      try {
+        const res = await fetch(API_BASE + '/categories', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (res.ok) {
+          alert('✓ 分类添加成功');
+          this.reset();
+          loadCategories();
+        } else {
+          alert('✗ ' + (result.error || '添加失败'));
+        }
+      } catch (err) {
+        alert('✗ 添加失败：' + err.message);
+      }
+    });
+    
+    // 编辑分类
+    function editCategory(id) {
+      fetch(API_BASE + '/categories', { headers: { 'Authorization': 'Bearer ' + token } })
+        .then(res => res.json())
+        .then(data => {
+          const category = data.list.find(c => c.id == id);
+          if (!category) {
+            alert('分类未找到');
+            return;
+          }
+          document.getElementById('editCategoryId').value = category.id;
+          document.getElementById('editName').value = category.name;
+          document.getElementById('editPointsRate').value = category.points_rate || 1.0;
+          document.getElementById('editLowCarbonTag').value = category.low_carbon_tag || '';
+          document.getElementById('editSortOrder').value = category.sort_order || 0;
+          document.getElementById('editDescription').value = category.description || '';
+          document.getElementById('editModal').style.display = 'block';
+        });
+    }
+    
+    function closeEditModal() {
+      document.getElementById('editModal').style.display = 'none';
+    }
+    
+    // 保存编辑
+    document.getElementById('editCategoryForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const id = document.getElementById('editCategoryId').value;
+      const data = {
+        name: document.getElementById('editName').value,
+        points_rate: parseFloat(document.getElementById('editPointsRate').value),
+        low_carbon_tag: document.getElementById('editLowCarbonTag').value || null,
+        sort_order: parseInt(document.getElementById('editSortOrder').value) || 0,
+        description: document.getElementById('editDescription').value || null
+      };
+      
+      try {
+        const res = await fetch(API_BASE + '/categories/' + id, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (res.ok) {
+          alert('✓ 分类已更新');
+          closeEditModal();
+          loadCategories();
+        } else {
+          alert('✗ ' + (result.error || '更新失败'));
+        }
+      } catch (err) {
+        alert('✗ 更新失败：' + err.message);
+      }
+    });
+    
+    // 启用/停用分类
+    async function toggleCategory(id, status) {
+      if (!confirm('确定要' + (status == 1 ? '启用' : '停用') + '该分类吗？')) return;
+      
+      try {
+        const res = await fetch(API_BASE + '/categories/' + id, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ is_active: status })
+        });
+        const result = await res.json();
+        if (res.ok) {
+          alert('✓ 操作成功');
+          loadCategories();
+        } else {
+          alert('✗ ' + (result.error || '操作失败'));
+        }
+      } catch (err) {
+        alert('✗ 操作失败：' + err.message);
+      }
+    }
+    
+    function logout() {
+      if (confirm('确定退出？')) {
+        localStorage.removeItem('adminToken');
+        localStorage.removeItem('adminInfo');
+        window.location.href = '/';
+      }
+    }
+    
+    // 点击模态框外部关闭
+    window.onclick = function(event) {
+      const modal = document.getElementById('editModal');
+      if (event.target == modal) {
+        closeEditModal();
+      }
+    }
+  </script>
+</body>
+</html>
